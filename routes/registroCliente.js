@@ -11,6 +11,7 @@ router.get('/listar/', async (req, res) => {
   try {
     const connection = await dbConnection(); // Obtén la conexión a la base de datos
     const idFilter = req.query.id;
+    const currentYear = new Date().getFullYear(); // Obtiene el año actual (2025)
     let sql = `
       SELECT
         registro.codRegistro,
@@ -28,14 +29,16 @@ router.get('/listar/', async (req, res) => {
       FROM
         registro
         JOIN cliente ON registro.codCliente = cliente.codCliente
-        JOIN localidad ON registro.codLocalidad = localidad.codLocalidad`;
+        JOIN localidad ON registro.codLocalidad = localidad.codLocalidad
+         WHERE YEAR(registro.fechRegistro) = ?`;
 
-    let params = [];
+         let params = [currentYear];
 
-    if (idFilter) {
-      sql += " WHERE registro.codLocalidad = ?";
-      params.push(idFilter);
-    }
+         if (idFilter) {
+           sql += " AND registro.codLocalidad = ?";
+           params.push(idFilter);
+         }
+     
 
     const [rows] = await connection.query(sql, params); // Ejecuta la consulta utilizando la conexión
 
